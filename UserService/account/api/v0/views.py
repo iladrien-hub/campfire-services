@@ -234,10 +234,20 @@ def remove_photo_view(request):
                 photo.image_big.delete(save=True)
                 photo.delete()
 
+                data = {
+                    "changed": reset_image
+                }
                 if reset_image:
                     try:
-                        photo.owner.photo = ProfileImage.objects.get(owner=photo.owner).pk
-                    except ProfileImage.DoesNotExist:
+                        new_photo = ProfileImage.objects.filter(owner=photo.owner).order_by('-pk')[0]
+                        photo.owner.photo = new_photo.pk
+                        data["new"] = {
+                            "medium": str(new_photo.image_medium),
+                            "big": str(new_photo.image_big),
+                            "id": new_photo.pk
+                        }
+                    except IndexError:
+                        data["new"] = None
                         photo.owner.photo = None
                     photo.owner.save()
 
@@ -245,7 +255,7 @@ def remove_photo_view(request):
                 return Response(data={
                     "success": True,
                     "errors": {},
-                    "data": {},
+                    "data": data,
                     "status": "Removed"
                 }, status=status.HTTP_200_OK)
             else:
