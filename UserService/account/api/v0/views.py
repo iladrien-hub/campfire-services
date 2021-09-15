@@ -92,7 +92,11 @@ def set_personal_view(request):
             return Response(data={
                 "success": True,
                 "errors": {},
-                "data": {},
+                "data": {
+                    "name": account.name,
+                    "surname": account.surname,
+                    "phone": account.phone,
+                },
                 "status": "Personal Data Successfully Updated"
             }, status=status.HTTP_200_OK)
         else:
