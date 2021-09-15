@@ -1,3 +1,5 @@
 /UserService/db.sqlite3
 /UserService/files/
 /venv/
+
+.idea
