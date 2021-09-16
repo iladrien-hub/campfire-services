@@ -1,5 +1,9 @@
-/UserService/db.sqlite3
-/UserService/files/
 /venv/
 
 .idea
+
+/BlogService/db.sqlite3
+
+/UserService/files/
+/UserService/db.sqlite3
+
