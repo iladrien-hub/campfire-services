@@ -1,0 +1,21 @@
+version: "3"
+
+services:
+
+  user-service:
+    build: UserService/
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./UserService:/code
+    ports:
+      - "8001:8000"
+
+  blog-service:
+    build: BlogService/
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./BlogService:/code
+    ports:
+      - "8002:8000"
+    environment:
+      - USER_SERVICE_ADDR=user-service
