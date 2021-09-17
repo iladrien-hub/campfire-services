@@ -1,21 +1,19 @@
 from rest_framework import status
-from rest_framework.authtoken.models import Token
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from account.api.v0.serializers import UserRegistrationSerializer, PersonalInfoSerializer, ChangePasswordSerializer, \
     ChangeUsernameSerializer
-from account.auth import AppAuthentication
 from account.models import ProfileImage
 
 
 @api_view(('GET',))
+@permission_classes([IsAuthenticated])
 def account_view(request):
-    account, _ = AppAuthentication().authenticate(request)
     images = ProfileImage.objects.all()
-
     try:
-        item = ProfileImage.objects.get(pk=account.photo)
+        item = ProfileImage.objects.get(pk=request.user.photo)
         photo = {
             "medium": str(item.image_medium),
             "big": str(item.image_big),
@@ -28,16 +26,16 @@ def account_view(request):
         "success": True,
         "errors": {},
         "data": {
-            "username": account.username,
-            "name": account.name,
-            "surname": account.surname,
-            "phone": account.phone,
+            "username": request.user.username,
+            "name": request.user.name,
+            "surname": request.user.surname,
+            "phone": request.user.phone,
             "photo": photo,
             "gallery": sorted([{
                 "medium": str(image.image_medium),
                 "big": str(image.image_big),
                 "id": image.pk
-            } for image in images if image.owner == account], key=lambda x: -x['id'])
+            } for image in images if image.owner == request.user], key=lambda x: -x['id'])
         },
         "status": ""
     }, status=status.HTTP_200_OK)
@@ -48,13 +46,11 @@ def registration_view(request):
     if request.method == 'POST':
         serializer = UserRegistrationSerializer(data=request.data)
         if serializer.is_valid():
-            account = serializer.save()
+            serializer.save()
             return Response(data={
                 "success": True,
                 "errors": {},
-                "data": {
-                    "token": Token.objects.get(user=account).key
-                },
+                "data": {},
                 "status": "User Created Successfully"
             }, status=status.HTTP_201_CREATED)
         else:
@@ -72,30 +68,30 @@ def registration_view(request):
 
 
 @api_view(('POST',))
+@permission_classes([IsAuthenticated])
 def authentication_view(request):
-    account, _ = AppAuthentication().authenticate(request)
-    return Response(data={"id": account.pk, "username": account.username}, status=status.HTTP_200_OK)
+    return Response(data={"id": request.user.pk, "username": request.user.username}, status=status.HTTP_200_OK)
 
 
 @api_view(('POST',))
+@permission_classes([IsAuthenticated])
 def set_personal_view(request):
     if request.method == 'POST':
-        account, _ = AppAuthentication().authenticate(request)
         serializer = PersonalInfoSerializer(data=request.data)
         if serializer.is_valid():
             # Updating data
-            account.name = serializer.validated_data['name']
-            account.surname = serializer.validated_data['surname']
-            account.phone = serializer.validated_data['phone']
-            account.save()
+            request.user.name = serializer.validated_data['name']
+            request.user.surname = serializer.validated_data['surname']
+            request.user.phone = serializer.validated_data['phone']
+            request.user.save()
             # Returning response
             return Response(data={
                 "success": True,
                 "errors": {},
                 "data": {
-                    "name": account.name,
-                    "surname": account.surname,
-                    "phone": account.phone,
+                    "name": request.user.name,
+                    "surname": request.user.surname,
+                    "phone": request.user.phone,
                 },
                 "status": "Personal Data Successfully Updated"
             }, status=status.HTTP_200_OK)
@@ -114,14 +110,14 @@ def set_personal_view(request):
 
 
 @api_view(('POST',))
+@permission_classes([IsAuthenticated])
 def set_password_view(request):
     if request.method == 'POST':
-        account, _ = AppAuthentication().authenticate(request)
         serializer = ChangePasswordSerializer(data=request.data)
         if serializer.is_valid():
             # Updating data
-            account.set_password(serializer.validated_data['password'])
-            account.save()
+            request.user.set_password(serializer.validated_data['password'])
+            request.user.save()
             # Returning response
             return Response(data={
                 "success": True,
@@ -144,15 +140,15 @@ def set_password_view(request):
 
 
 @api_view(('POST',))
+@permission_classes([IsAuthenticated])
 def set_username_view(request):
     if request.method == 'POST':
-        account, _ = AppAuthentication().authenticate(request)
         serializer = ChangeUsernameSerializer(data=request.data)
 
         if serializer.is_valid():
             # Updating data
-            account.username = serializer.validated_data['username']
-            account.save()
+            request.user.username = serializer.validated_data['username']
+            request.user.save()
             # Returning response
             return Response(data={
                 "success": True,
@@ -175,18 +171,18 @@ def set_username_view(request):
 
 
 @api_view(('POST',))
+@permission_classes([IsAuthenticated])
 def add_photo_view(request):
 
     if request.method == 'POST':
         try:
             # Saving data
-            account, _ = AppAuthentication().authenticate(request)
             photo = ProfileImage()
             photo.set_image(request.data['image'])
-            photo.owner = account
+            photo.owner = request.user
             photo.save()
-            account.photo = photo.pk
-            account.save()
+            request.user.photo = photo.pk
+            request.user.save()
             # Returning response
             return Response(data={
                 "success": True,
@@ -214,9 +210,9 @@ def add_photo_view(request):
 
 
 @api_view(('DELETE',))
+@permission_classes([IsAuthenticated])
 def remove_photo_view(request):
     if request.method == 'DELETE':
-        account, _ = AppAuthentication().authenticate(request)
         try:
             # Saving data
             pk = request.data['id']
@@ -230,7 +226,7 @@ def remove_photo_view(request):
                     "status": "Not Found"
                 }, status=status.HTTP_404_NOT_FOUND)
 
-            if account.is_admin or account == photo.owner:
+            if request.user.is_admin or request.user == photo.owner:
                 print(str(photo.owner.photo), pk, str(photo.owner.photo) == pk)
                 reset_image = str(photo.owner.photo) == pk
 
