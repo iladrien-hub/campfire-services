@@ -7,6 +7,7 @@ from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db import models
+from django.utils.deconstruct import deconstructible
 
 
 class AccountManager(BaseUserManager):
@@ -75,16 +76,19 @@ class Account(AbstractBaseUser):
         return True
 
 
-def upload_to(path):
-    def func(instance, filename):
-        return os.path.join(".", path, f"{binascii.hexlify(os.urandom(20)).decode()}.jpg")
-    return func
+@deconstructible
+class UploadTo(object):
+    def __init__(self, path):
+        self.path = path
+
+    def __call__(self, instance, filename):
+        return os.path.join(".", self.path, f"{binascii.hexlify(os.urandom(20)).decode()}.jpg")
 
 
 class ProfileImage(models.Model):
     owner = models.ForeignKey(Account, on_delete=models.CASCADE)
-    image_medium = models.ImageField(upload_to=upload_to('medium'))
-    image_big = models.ImageField(upload_to=upload_to('big'))
+    image_medium = models.ImageField(upload_to=UploadTo('medium'))
+    image_big = models.ImageField(upload_to=UploadTo('big'))
 
     def resize(self, image, size):
         resize = min(image.size[0], size)
