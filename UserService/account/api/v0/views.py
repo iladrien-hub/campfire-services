@@ -1,6 +1,6 @@
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 
 from account.api.v0.serializers import UserRegistrationSerializer, PersonalInfoSerializer, ChangePasswordSerializer, \
@@ -42,6 +42,7 @@ def account_view(request):
 
 
 @api_view(('POST',))
+@permission_classes([AllowAny])
 def registration_view(request):
     if request.method == 'POST':
         serializer = UserRegistrationSerializer(data=request.data)
