@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from article.models import Article, ArticleImage
+from article.models import Article, ArticleImage, Image
 
 
 class ArticleCreationSerializer(serializers.ModelSerializer):
@@ -21,3 +21,22 @@ class ArticleCreationSerializer(serializers.ModelSerializer):
             article_image.set_image(image)
             article_image.save()
         return article
+
+
+class ImageSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Image
+        fields = ['image_medium', 'image_big']
+
+
+class ArticleSerializer(serializers.ModelSerializer):
+
+    images = serializers.SerializerMethodField()
+
+    def get_images(self, obj):
+        return [ImageSerializer(instance=image).data for image in ArticleImage.objects.filter(model=obj)]
+
+    class Meta:
+        model = Article
+        fields = ['pk', 'text', 'created', 'user', 'images']
