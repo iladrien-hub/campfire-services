@@ -60,7 +60,8 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'authentication.UserServiceAuthentication',
-    ]
+    ],
+    'DATETIME_FORMAT': '%s',
 }
 
 ROOT_URLCONF = 'BlogService.urls'
