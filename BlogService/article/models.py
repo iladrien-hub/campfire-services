@@ -1,3 +1,8 @@
 from django.db import models
 
-# Create your models here.
+
+class Article(models.Model):
+    title = models.CharField(verbose_name="Title", max_length=60)
+    text = models.TextField(verbose_name="Text")
+
+    user = models.IntegerField(verbose_name="Author")
