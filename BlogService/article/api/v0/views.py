@@ -3,7 +3,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from article.api.v0.serializers import ArticleCreationSerializer
+from article.api.v0.serializers import ArticleCreationSerializer, ArticleSerializer
 
 
 @api_view(('POST', ))
@@ -13,11 +13,11 @@ def article_create_view(request):
     if request.method == 'POST':
         serializer = ArticleCreationSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(request.user.id)
+            article = serializer.save(request.user.id)
             return Response(data={
                 "success": True,
                 "errors": {},
-                "data": {},
+                "data": ArticleSerializer(instance=article).data,
                 "status": "Article Added Successfully"
             }, status=status.HTTP_201_CREATED)
         else:
