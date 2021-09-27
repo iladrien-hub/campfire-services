@@ -6,3 +6,6 @@ class Article(models.Model):
     text = models.TextField(verbose_name="Text")
 
     user = models.IntegerField(verbose_name="Author")
+
+    def __str__(self):
+        return self.title
