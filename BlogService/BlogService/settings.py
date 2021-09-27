@@ -33,7 +33,8 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     # Service Apps
     'article',
-    
+    'authentication',
+
     # Default Apps
     'django.contrib.admin',
     'django.contrib.auth',
@@ -54,12 +55,12 @@ MIDDLEWARE = [
 ]
 
 REST_FRAMEWORK = {
-    # 'DEFAULT_PERMISSION_CLASSES': (
-    #     'rest_framework.permissions.IsAuthenticated',
-    # ),
-    # 'DEFAULT_AUTHENTICATION_CLASSES': [
-    #     'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
-    # ]
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'authentication.UserServiceAuthentication',
+    ]
 }
 
 ROOT_URLCONF = 'BlogService.urls'
@@ -155,3 +156,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
+
+# ENVIRONMENT
+
+USER_SERVICE_ADDR = os.environ.get("USER_SERVICE_ADDR")
