@@ -6,6 +6,6 @@ app_name = 'article'
 
 
 urlpatterns = [
-    path('create', views.article_create_view, name='create'),
+    path('create', views.ArticleViewSet.as_view(actions={"post": "create"}), name='create'),
     path('retrieve/<int:pk>', views.ArticleViewSet.as_view(actions={"get": "retrieve"}), name='retrieve'),
 ]

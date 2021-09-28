@@ -8,11 +8,15 @@ from article.api.v0.serializers import ArticleCreationSerializer, ArticleSeriali
 from article.models import Article
 
 
-@api_view(('POST', ))
-@permission_classes([IsAuthenticated])
-def article_create_view(request):
+class ArticleViewSet(viewsets.ViewSet):
 
-    if request.method == 'POST':
+    def retrieve(self, request, pk=None):
+        queryset = Article.objects.all()
+        user = get_object_or_404(queryset, pk=pk)
+        serializer = ArticleSerializer(user)
+        return Response(serializer.data)
+
+    def create(self, request):
         serializer = ArticleCreationSerializer(data=request.data)
         if serializer.is_valid():
             article = serializer.save(request.user.id)
@@ -29,22 +33,7 @@ def article_create_view(request):
                 "status": "Failed To Add a New Article"
             }, status=status.HTTP_400_BAD_REQUEST)
 
-    return Response(data={
-        "success": False,
-        "errors": {},
-        "status": "Method Not Allowed"
-    }, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-
-
-class ArticleViewSet(viewsets.ViewSet):
-
-    def retrieve(self, request, pk=None):
-        queryset = Article.objects.all()
-        user = get_object_or_404(queryset, pk=pk)
-        serializer = ArticleSerializer(user)
-        return Response(serializer.data)
-
     def get_permissions(self):
         if self.action in ('list', 'retrieve'):
-            return (AllowAny(), )
-        return (IsAuthenticated(), )
+            return (AllowAny(),)
+        return (IsAuthenticated(),)
