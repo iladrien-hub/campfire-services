@@ -6,6 +6,8 @@ from PIL import Image as PILImage
 from django.core.files.base import ContentFile
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db import models
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
 from django.utils.deconstruct import deconstructible
 
 
@@ -66,3 +68,9 @@ class Image(models.Model):
 
 class ArticleImage(Image):
     model = models.ForeignKey(Article, on_delete=models.CASCADE)
+
+
+@receiver(post_delete, sender=Image)
+def on_remove_image(sender, **kwargs):
+    kwargs["instance"].image_medium.delete(save=True)
+    kwargs["instance"].image_big.delete(save=True)
