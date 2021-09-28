@@ -35,7 +35,7 @@ class ArticleSerializer(serializers.ModelSerializer):
     images = serializers.SerializerMethodField()
 
     def get_images(self, obj):
-        return [ImageSerializer(instance=image).data for image in ArticleImage.objects.filter(model=obj)]
+        return ImageSerializer(ArticleImage.objects.filter(model=obj), many=True).data
 
     class Meta:
         model = Article
