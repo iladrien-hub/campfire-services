@@ -62,6 +62,8 @@ REST_FRAMEWORK = {
         'authentication.UserServiceAuthentication',
     ],
     'DATETIME_FORMAT': '%s',
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 5,
 }
 
 ROOT_URLCONF = 'BlogService.urls'
