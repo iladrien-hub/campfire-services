@@ -1,4 +1,4 @@
-from rest_framework import status, viewsets
+from rest_framework import status, viewsets, generics
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
@@ -51,3 +51,12 @@ class ArticleViewSet(viewsets.ViewSet):
         if self.action in ('list', 'retrieve'):
             return (AllowAny(),)
         return (IsAuthenticated(),)
+
+
+class ArticleSearchView(generics.ListAPIView):
+
+    permission_classes = (AllowAny, )
+    serializer_class = ArticleSerializer
+
+    def get_queryset(self):
+        return Article.objects.filter(user=self.request.query_params["user"])
