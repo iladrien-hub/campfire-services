@@ -1,9 +1,11 @@
-from rest_framework import status
+from rest_framework import status, mixins, viewsets
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.generics import GenericAPIView, get_object_or_404
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 
 from article.api.v0.serializers import ArticleCreationSerializer, ArticleSerializer
+from article.models import Article
 
 
 @api_view(('POST', ))
@@ -32,3 +34,17 @@ def article_create_view(request):
         "errors": {},
         "status": "Method Not Allowed"
     }, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+
+class ArticleViewSet(viewsets.ViewSet):
+
+    def retrieve(self, request, pk=None):
+        queryset = Article.objects.all()
+        user = get_object_or_404(queryset, pk=pk)
+        serializer = ArticleSerializer(user)
+        return Response(serializer.data)
+
+    def get_permissions(self):
+        if self.action in ('list', 'retrieve'):
+            return (AllowAny(), )
+        return (IsAuthenticated(), )
