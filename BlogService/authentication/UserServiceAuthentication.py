@@ -7,9 +7,9 @@ from BlogService.settings import USER_SERVICE_ADDR
 
 @dataclass
 class Account:
-    id: int
-    username: str
-    is_authenticated: bool
+    id: int = 0
+    username: str = None
+    is_authenticated: bool = False
 
 
 class UserServiceAuthentication(authentication.BaseAuthentication):
@@ -17,7 +17,7 @@ class UserServiceAuthentication(authentication.BaseAuthentication):
     def authenticate(self, request):
         token = request.META.get("HTTP_AUTHORIZATION")
         if not token:
-            raise exceptions.AuthenticationFailed('Credentials was not provided')
+            return None
 
         r = requests.post(f'http://{USER_SERVICE_ADDR}:8000/api/v0/jwt-token-verify', headers={
             "Authorization": token
